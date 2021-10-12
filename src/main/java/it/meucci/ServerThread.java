@@ -10,19 +10,29 @@ public class ServerThread extends Thread {
     String StringMD = null;
     BufferedReader inDalClient;
     DataOutputStream outVersoClient;
+    MultiSrv gestore;
 
-    public ServerThread(Socket socket, ServerSocket server) {
+    public ServerThread(Socket socket, ServerSocket server, MultiSrv gestore) {
         this.client = socket;
         this.server = server;
+        this.gestore = gestore;
     }
 
     public void run() {
         try {
             comunica();
         } catch (Exception e) {
-
         }
 
+    }
+    public void close(){
+        try {
+            outVersoClient.close();
+            inDalClient.close();
+            client.close();
+        } catch (IOException e) {
+            
+        }
     }
 
     public void comunica() throws Exception {
@@ -34,6 +44,8 @@ public class ServerThread extends Thread {
             if (StringRV == null || StringRV.equals("FINE") || StringRV.equals("STOP")) {
                 outVersoClient.writeBytes(StringRV + " (=>server in chiusura..)" + '\n');
                 System.out.println("Echo sul server in chiusura : " + StringRV);
+                outVersoClient.close();
+                inDalClient.close();
                 client.close();
                 break;
             } else {
@@ -46,6 +58,7 @@ public class ServerThread extends Thread {
         System.out.println("9 Chiusura socket ..." + client);
         client.close();
         if (StringRV.equals("STOP")) {
+            gestore.close();
             server.close();
         }
     }
