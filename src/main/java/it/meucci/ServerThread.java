@@ -61,6 +61,8 @@ public class ServerThread extends Thread {
         if (StringRV.equals("STOP")) {
             gestore.close();
             server.close();
+            System.out.println("Server in chiusura");
+            System.exit(1);
         }
     }
 }

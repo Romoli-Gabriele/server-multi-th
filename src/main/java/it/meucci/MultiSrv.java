@@ -22,7 +22,6 @@ public class MultiSrv {
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            System.out.println("errore durante l'istanza del server");
             System.exit(1);
         }
     }
