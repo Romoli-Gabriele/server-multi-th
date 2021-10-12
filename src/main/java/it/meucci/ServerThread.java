@@ -27,6 +27,7 @@ public class ServerThread extends Thread {
     }
     public void close(){
         try {
+            outVersoClient.writeBytes("close");
             outVersoClient.close();
             inDalClient.close();
             client.close();
