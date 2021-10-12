@@ -11,8 +11,9 @@ public class ServerThread extends Thread {
     BufferedReader inDalClient;
     DataOutputStream outVersoClient;
 
-    public ServerThread(Socket socket) {
+    public ServerThread(Socket socket, ServerSocket server) {
         this.client = socket;
+        this.server = server;
     }
 
     public void run() {
@@ -29,18 +30,23 @@ public class ServerThread extends Thread {
         outVersoClient = new DataOutputStream(client.getOutputStream());
         for (;;) {
             StringRV = inDalClient.readLine();
-            if (StringRV == null || StringRV.equals("FINE")) {
+            StringMD = StringRV.toUpperCase();
+            if (StringRV == null || StringRV.equals("FINE") || StringRV.equals("STOP")) {
                 outVersoClient.writeBytes(StringRV + " (=>server in chiusura..)" + '\n');
                 System.out.println("Echo sul server in chiusura : " + StringRV);
+                client.close();
                 break;
-            }else{
-                outVersoClient.writeBytes(StringMD +"(ricevuta e ritrasmessa)"+'\n');
+            } else {
+                outVersoClient.writeBytes(StringMD + "(ricevuta e ritrasmessa)" + '\n');
                 System.out.println("6 Echo sul server: " + StringRV);
             }
-            outVersoClient.close();
-            inDalClient.close();
-            System.out.println("9 Chiusura socket ..."+client);
-            client.close();
+        }
+        outVersoClient.close();
+        inDalClient.close();
+        System.out.println("9 Chiusura socket ..." + client);
+        client.close();
+        if (StringRV.equals("STOP")) {
+            server.close();
         }
     }
 }

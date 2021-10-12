@@ -14,7 +14,7 @@ public class MultiSrv {
                 System.out.println("Server partito in esecuzione..." + ind);
                 Socket socket = server.accept();
                 System.out.println("3 Server socket " + server);
-                ServerThread serverthread = new ServerThread(socket);
+                ServerThread serverthread = new ServerThread(socket,server);
                 serverthread.start();
             }
         } catch (Exception e) {
