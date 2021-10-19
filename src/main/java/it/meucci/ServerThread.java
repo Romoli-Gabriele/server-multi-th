@@ -10,12 +10,12 @@ public class ServerThread extends Thread {
     String StringMD = null;
     BufferedReader inDalClient;
     DataOutputStream outVersoClient;
-    MultiSrv gestore;
+    MultiSrv allThread;
 
     public ServerThread(Socket socket, ServerSocket server, MultiSrv gestore) {
         this.client = socket;
         this.server = server;
-        this.gestore = gestore;
+        this.allThread = gestore;
     }
 
     public void run() {
@@ -27,12 +27,12 @@ public class ServerThread extends Thread {
     }
     public void close(){
         try {
-            outVersoClient.writeBytes("close");
+            outVersoClient.writeBytes("close");// invia segnale al client di chiudersi
             outVersoClient.close();
             inDalClient.close();
             client.close();
         } catch (IOException e) {
-            
+            System.out.println("Errore invio messaggio di chiusura");
         }
     }
 
@@ -40,10 +40,10 @@ public class ServerThread extends Thread {
         inDalClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
         outVersoClient = new DataOutputStream(client.getOutputStream());
         for (;;) {
-            StringRV = inDalClient.readLine();
-            StringMD = StringRV.toUpperCase();
-            if (StringRV == null || StringRV.equals("FINE") || StringRV.equals("STOP")) {
-                outVersoClient.writeBytes(StringRV + " (=>server in chiusura..)" + '\n');
+            StringRV = inDalClient.readLine();//Lettura dal client
+            StringMD = StringRV.toUpperCase();//modifica stringa
+            if (StringRV == null || StringMD.equals("FINE") || StringMD.equals("STOP")) { //chiusura thread 
+                outVersoClient.writeBytes(StringRV + " (=>server dedicato in chiusura..)" + '\n');
                 System.out.println("Echo sul server in chiusura : " + StringRV);
                 outVersoClient.close();
                 inDalClient.close();
@@ -59,7 +59,7 @@ public class ServerThread extends Thread {
         System.out.println("9 Chiusura socket ..." + client);
         client.close();
         if (StringRV.equals("STOP")) {
-            gestore.close();
+            allThread.close();//chiama la chiusura di tutti i thread
             server.close();
             System.out.println("Server in chiusura");
             System.exit(1);

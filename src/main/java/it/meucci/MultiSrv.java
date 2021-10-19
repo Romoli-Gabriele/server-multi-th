@@ -6,28 +6,28 @@ import java.net.Socket;
 import java.util.Vector;
 
 public class MultiSrv {
-    Vector<ServerThread> threadList = new Vector<ServerThread>();
+    Vector<ServerThread> threadList = new Vector<ServerThread>(); //Creazione lista dei gestori dei client
 
     public void start() {
         try {
-            ServerSocket server = new ServerSocket(6789);
-            String ind = InetAddress.getLocalHost().getHostAddress();
+            ServerSocket server = new ServerSocket(6789); //Apertura porta
+            String ind = InetAddress.getLocalHost().getHostAddress();//IP server
+            System.out.println("Server partito in esecuzione..." + ind);
             for (;;) {
-                System.out.println("Server partito in esecuzione..." + ind);
-                Socket socket = server.accept();
+                Socket socket = server.accept();//accetta client e libera la porta
                 System.out.println("3 Server socket " + server);
-                ServerThread serverthread = new ServerThread(socket,server,this);
-                threadList.add(serverthread);
+                ServerThread serverthread = new ServerThread(socket,server,this);//creazione thread per gestire il client
+                threadList.add(serverthread);//aggiungi il gestore appena creato alla lista
                 serverthread.start();
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Errore connessione client o creazione thread");
             System.exit(1);
         }
     }
     public void close(){
         for(int i = 0;i < threadList.size(); i++){
-            threadList.get(i).close();
+            threadList.get(i).close();//chiusura di tutti i socket 
         }
     }
 
