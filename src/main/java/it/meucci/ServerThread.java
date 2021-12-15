@@ -11,11 +11,13 @@ public class ServerThread extends Thread {
     BufferedReader inDalClient;
     DataOutputStream outVersoClient;
     MultiSrv allThread;
+    int index;
 
-    public ServerThread(Socket socket, ServerSocket server, MultiSrv gestore) {
+    public ServerThread(Socket socket, ServerSocket server, MultiSrv gestore, int index) {
         this.client = socket;
         this.server = server;
         this.allThread = gestore;
+        this.index = index;
     }
 
     public void run() {
@@ -25,9 +27,15 @@ public class ServerThread extends Thread {
         }
 
     }
-    public void close(){
+    public void close(boolean D){
         try {
-            outVersoClient.writeBytes("close");// invia segnale al client di chiudersi
+            String rispostaChiusura;
+            if(D){
+                rispostaChiusura =("Disponibili 0 biglietti\n");
+            }else{
+                rispostaChiusura =("Biglietti Esauriti\n");
+            }
+            outVersoClient.writeBytes(rispostaChiusura);// invia segnale al client di chiudersi
             outVersoClient.close();
             inDalClient.close();
             client.close();
@@ -41,28 +49,16 @@ public class ServerThread extends Thread {
         outVersoClient = new DataOutputStream(client.getOutputStream());
         for (;;) {
             StringRV = inDalClient.readLine();//Lettura dal client
-            StringMD = StringRV.toUpperCase();//modifica stringa
-            if (StringRV == null || StringMD.equals("FINE") || StringMD.equals("STOP")) { //chiusura thread 
-                outVersoClient.writeBytes(StringRV + " (=>server dedicato in chiusura..)" + '\n');
-                System.out.println("Echo sul server in chiusura : " + StringRV);
-                outVersoClient.close();
-                inDalClient.close();
-                client.close();
-                break;
-            } else {
-                outVersoClient.writeBytes(StringMD + "(ricevuta e ritrasmessa)" + '\n');
-                System.out.println("6 Echo sul server: " + StringRV);
+            if(StringRV.equals("D")){
+                StringMD = ("Disponibili "+allThread.nBiglietti+" biglietti\n");
+                if(allThread.nBiglietti==0){
+                    allThread.close(this.index);
+                }
+            }else if(StringRV.equals("A")){
+               StringMD = allThread.vendi(this.index);
             }
+            outVersoClient.writeBytes(StringMD+'\n');
         }
-        outVersoClient.close();
-        inDalClient.close();
-        System.out.println("9 Chiusura socket ..." + client);
-        client.close();
-        if (StringRV.equals("STOP")) {
-            allThread.close();//chiama la chiusura di tutti i thread
-            server.close();
-            System.out.println("Server in chiusura");
-            System.exit(1);
-        }
+        
     }
 }
